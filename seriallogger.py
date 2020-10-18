@@ -81,6 +81,8 @@ def process_mpl(data):
 
 def process_wifi(data):
     dv=data.split("|")
+    wv=dict()
+    i=0
     for s in range(int(len(dv)/5)):
         kv = dict()        
         kv['ssid']=dv[s*5]
@@ -89,7 +91,9 @@ def process_wifi(data):
         kv['channel']=dv[s*5+3]
         kv['encryption']=dv[s*5+4]
         kv['sensor']='esp8266wifi'
-        send_wifi(kv)
+        wv[i]=kv
+        i=i+1
+    send_wifi(wv)
     return
 
 
