@@ -51,6 +51,7 @@ def process_bmp(data):
         kv['pressure']=float(dv[1])
         kv['altitude']=float(dv[2])
         kv['sensor']='bmp180'
+        kv['ts']=time.time()
         send_bmp(kv)
     return
 
@@ -66,6 +67,7 @@ def process_mpu(data):
         kv['gyroscopez']=float(dv[5])
         kv['temperature']=float(dv[6])
         kv['sensor']='mpu6050'
+        kv['ts']=time.time()
         send_mpu(kv)
     return
 
@@ -76,6 +78,7 @@ def process_mpl(data):
         kv['altitude']=float(dv[0])
         kv['temperature']=float(dv[1])
         kv['sensor']='mpl3115a2'
+        kv['ts']=time.time()
         send_mpl(kv)
     return
 
@@ -91,6 +94,7 @@ def process_wifi(data):
         kv['channel']=dv[s*5+3]
         kv['encryption']=dv[s*5+4]
         kv['sensor']='esp8266wifi'
+        kv['ts']=time.time()
         wv[i]=kv
         i=i+1
     send_wifi(wv)
@@ -101,7 +105,7 @@ try:
     print("Application started!")
     while running:
         sl=ser.readline().rstrip().decode()
-        sv=sl.split(":",1)
+        sv=sl.split("\t",1)
         if len(sv)==2:
             if sv[0]=="BMP":
                 process_bmp(sv[1])
