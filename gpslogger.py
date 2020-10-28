@@ -11,9 +11,46 @@ import socket
 from gps import *
 import time
 
+
+last_tpv={}
+def processgps_tpv(update):
+    for k in update.keys():
+        if not last_tpv.has_key(k):
+            last_tpv[k]=""
+        if last_tpv[k] != update[k]:
+            mqttclient.publish("gps/"+k,update[k])
+            last_tpv[k] = update[k]
+
+
+last_sky={}
+def processgps_sky(update):
+    for k in update.keys():
+        if k=='satellites':
+            for k2 in update['satellites']:
+                for k3 in k2.keys():
+                    key="gpssky."+str(k2['PRN'])+"."+k3
+                    if not last_sky.has_key(key):
+                        last_sky[key]=""
+                    if last_sky[key] != k2[k3]:
+                        mqttclient.publish("gpssky/"+str(k2['PRN'])+"/"+k3,k2[k3])
+                        last_sky[key] = k2[k3]
+        else:
+            if not last_sky.has_key(k):
+                last_sky[k]=""
+            if last_sky[k] != update[k]:
+                mqttclient.publish("gpssky/"+k,update[k])
+                last_sky[k]=update[k]
+
+
+
 def processgps():
     update=gps.next()
-    print(update)
+    if update['class'] == 'TPV':
+        processgps_tpv(update)
+    elif update['class'] == 'SKY':
+        processgps_sky(update)
+    else:
+        print(update)
 
 
 
@@ -35,7 +72,7 @@ try:
     print("Application started!")
     while running:
         gw = gps.waiting()
-        print(gw)
+        #print(gw)
         if gw:
             processgps()
         time.sleep(0.001)
